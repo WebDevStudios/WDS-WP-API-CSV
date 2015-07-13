@@ -78,6 +78,14 @@ class WDS_WP_API_CSV {
 	protected $basename = '';
 
 	/**
+	 * WDS_WP_API_CSV_Handler instance
+	 *
+	 * @var WDS_WP_API_CSV_Handler
+	 * @since  0.1.0
+	 */
+	protected $csv_handler = null;
+
+	/**
 	 * Singleton instance of plugin
 	 *
 	 * @var WDS_WP_API_CSV
@@ -120,8 +128,8 @@ class WDS_WP_API_CSV {
 	 * @return  null
 	 */
 	function plugin_classes() {
-		// Attach other plugin classes to the base plugin class.
-		// $this->admin = new WDSWPAPICSV_Admin( $this );
+		require_once $this->path . 'includes/handler.php';
+		$this->csv_handler = new WDS_WP_API_CSV_Handler();
 	}
 
 	/**
@@ -165,7 +173,7 @@ class WDS_WP_API_CSV {
 	 */
 	public function init() {
 		if ( $this->check_requirements() ) {
-			add_filter( 'rest_pre_serve_request', array( $this, 'check_for_csv_and_overload' ), 10, 4 );
+			add_filter( 'rest_pre_serve_request', array( $this->csv_handler, 'check_for_csv_and_overload' ), 10, 4 );
 		}
 	}
 
@@ -221,162 +229,6 @@ class WDS_WP_API_CSV {
 		echo '<div id="message" class="error">';
 		echo '<p>' . sprintf( __( 'WDS WP-API CSV is missing requirements (the WP-API plugin) and has been <a href="%s">deactivated</a>. Please make sure all requirements are available.', 'wds-wp-api-csv' ), admin_url( 'plugins.php' ) ) . '</p>';
 		echo '</div>';
-	}
-
-	/**
-	 * Checks for '_csv' query param and downloads a csv of the json data
-	 *
-	 * @since  0.1.0
-	 *
-	 * @param  bool                      $served         Whether the request has already been served
-	 * @param  WP_HTTP_ResponseInterface $result         Result to send to the client.
-	 * @param  WP_REST_Request           $request        Request used to generate the response
-	 * @param  WP_REST_Server            $wp_rest_server Server instance
-	 *
-	 * @return null
-	 */
-	public function check_for_csv_and_overload( $served, $result, $request, $wp_rest_server ) {
-		if ( ! isset( $_GET['_csv'] ) ) {
-			return $served;
-		}
-
-		if ( empty( $result->data ) ) {
-			return $served;
-		}
-
-		$file = 'report.csv';
-		header( "Content-Type: ;charset=utf-8" );
-		header( "Content-Disposition: attachment;filename=\"$file\"" );
-		header( "Pragma: no-cache" );
-		header( "Expires: 0" );
-		$csv = fopen('php://output', 'w');
-
-		$done = false;
-
-
-		foreach( $result->data as $post ) {
-
-			// Do first csv column row
-			if ( ! $done ) {
-				$cols = $this->get_csv_column_headers( $post );
-				fputcsv( $csv, $cols );
-				$done = true;
-			}
-
-
-			$values = array();
-
-			// Get some column values
-			foreach ( $post as $column => $val ) {
-				if ( ! in_array( $column, array(
-					'_links',
-					'guid',
-					'content',
-				) ) )	{
-					$values[] = $this->assign_csv_value( $val );
-				}
-			}
-
-			// Get associated links
-			if ( isset( $post['_links'] ) ) {
-				foreach ( $post['_links'] as $column => $col_value ) {
-
-					if ( in_array( $column, array(
-						'self',
-						'collection',
-						'author',
-						'replies',
-						'version-history',
-						'http://v2.wp-api.org/attachment',
-					) ) )	{
-						continue;
-					}
-
-					foreach ( $col_value as $val ) {
-						if ( isset( $val['href'] ) ) {
-							$values[] = $val['href'];
-						}
-					}
-				}
-			}
-
-			// and update the csv row
-			fputcsv( $csv, $values );
-		}
-
-		// Download it
-		fclose( $csv );
-		exit();
-	}
-
-	/**
-	 * Get column names from $post array
-	 *
-	 * @since  0.1.0
-	 *
-	 * @param  array  $post Array of post data
-	 *
-	 * @return array        Array of column names
-	 */
-	public function get_csv_column_headers( $post ) {
-		$cols = array();
-		foreach ( array_keys( (array) $post ) as $column ) {
-			if ( ! in_array( $column, array(
-				'_links',
-				'guid',
-				'content',
-			) ) )	{
-				$cols[] = $column;
-			}
-		}
-
-
-		if ( isset( $post['_links'] ) ) {
-			foreach ( $post['_links'] as $column => $col_value ) {
-
-				if ( in_array( $column, array(
-					'self',
-					'collection',
-					'author',
-					'replies',
-					'version-history',
-					'http://v2.wp-api.org/attachment',
-				) ) )	{
-					continue;
-				}
-
-				foreach ( $col_value as $val ) {
-					if ( isset( $val['href'] ) ) {
-						$cols[] = isset( $val['taxonomy'] ) ? $val['taxonomy'] : $val['href'];
-					}
-				}
-			}
-		}
-
-		error_log( '$cols: '. print_r( $cols, true ) );
-
-		return $cols;
-	}
-
-	/**
-	 * Assign a csv cell value. Needs to be scalar
-	 *
-	 * @since  0.1.0
-	 *
-	 * @param  mixed  $value Value given by API
-	 *
-	 * @return mixed         A scalar value
-	 */
-	public function assign_csv_value( $value ) {
-		if ( isset( $value['rendered'] ) ) {
-			$value = $value['rendered'];
-		} elseif ( is_scalar( $value ) ) {
-			$value = $value;
-		} else {
-			$value = 'needs-parsing';
-		}
-
-		return $value;
 	}
 
 	/**
