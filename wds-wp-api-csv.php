@@ -9,8 +9,8 @@
 * Donate link: http://webdevstudios.com
 * License:     GPLv2
 * Text Domain: wds-wp-api-csv
- * Domain Path: /languages
- */
+* Domain Path: /languages
+*/
 
 /**
  * Copyright (c) 2015 WebDevStudios (email : contact@webdevstudios.com)
@@ -33,11 +33,6 @@
 /**
  * Built using generator-plugin-wp
  */
-
-
-	// Include additional php files here
-	// require 'includes/admin.php';
-
 
 /**
  * Main initiation class
@@ -228,6 +223,18 @@ class WDS_WP_API_CSV {
 		echo '</div>';
 	}
 
+	/**
+	 * Checks for '_csv' query param and downloads a csv of the json data
+	 *
+	 * @since  0.1.0
+	 *
+	 * @param  bool                      $served         Whether the request has already been served
+	 * @param  WP_HTTP_ResponseInterface $result         Result to send to the client.
+	 * @param  WP_REST_Request           $request        Request used to generate the response
+	 * @param  WP_REST_Server            $wp_rest_server Server instance
+	 *
+	 * @return null
+	 */
 	public function check_for_csv_and_overload( $served, $result, $request, $wp_rest_server ) {
 		if ( ! isset( $_GET['_csv'] ) ) {
 			return $served;
@@ -251,7 +258,7 @@ class WDS_WP_API_CSV {
 
 			// Do first csv column row
 			if ( ! $done ) {
-				$cols = $this->add_csv_column_headers( $post );
+				$cols = $this->get_csv_column_headers( $post );
 				fputcsv( $csv, $cols );
 				$done = true;
 			}
@@ -302,7 +309,16 @@ class WDS_WP_API_CSV {
 		exit();
 	}
 
-	public function add_csv_column_headers( $post ) {
+	/**
+	 * Get column names from $post array
+	 *
+	 * @since  0.1.0
+	 *
+	 * @param  array  $post Array of post data
+	 *
+	 * @return array        Array of column names
+	 */
+	public function get_csv_column_headers( $post ) {
 		$cols = array();
 		foreach ( array_keys( (array) $post ) as $column ) {
 			if ( ! in_array( $column, array(
@@ -342,6 +358,15 @@ class WDS_WP_API_CSV {
 		return $cols;
 	}
 
+	/**
+	 * Assign a csv cell value. Needs to be scalar
+	 *
+	 * @since  0.1.0
+	 *
+	 * @param  mixed  $value Value given by API
+	 *
+	 * @return mixed         A scalar value
+	 */
 	public function assign_csv_value( $value ) {
 		if ( isset( $value['rendered'] ) ) {
 			$value = $value['rendered'];
