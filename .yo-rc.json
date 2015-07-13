@@ -1,0 +1,17 @@
+{
+  "generator-plugin-wp": {
+    "name": "WDS WP-API CSV",
+    "homepage": "http://webdevstudios.com",
+    "description": "Output WP-API json data to CSV",
+    "version": "0.1.0",
+    "author": "WebDevStudios",
+    "authoremail": "contact@webdevstudios.com",
+    "authorurl": "http://webdevstudios.com",
+    "license": "GPLv2",
+    "slug": "wds-wp-api-csv",
+    "classname": "WDS_WP_API_CSV",
+    "classprefix": "WDSWPAPICSV_",
+    "prefix": "wds_wp_api_csv",
+    "year": 2015
+  }
+}
