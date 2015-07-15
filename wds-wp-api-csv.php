@@ -142,7 +142,9 @@ class WDS_WP_API_CSV {
 		register_activation_hook( __FILE__, array( $this, '_activate' ) );
 		register_deactivation_hook( __FILE__, array( $this, '_deactivate' ) );
 
-		add_action( 'init', array( $this, 'init' ) );
+		if ( $this->check_requirements() ) {
+			add_filter( 'rest_pre_serve_request', array( $this->csv_handler, 'check_for_csv_and_overload' ), 10, 4 );
+		}
 	}
 
 	/**
@@ -164,18 +166,6 @@ class WDS_WP_API_CSV {
 	 * @return null
 	 */
 	function _deactivate() {}
-
-	/**
-	 * Init hooks
-	 *
-	 * @since  0.1.0
-	 * @return null
-	 */
-	public function init() {
-		if ( $this->check_requirements() ) {
-			add_filter( 'rest_pre_serve_request', array( $this->csv_handler, 'check_for_csv_and_overload' ), 10, 4 );
-		}
-	}
 
 	/**
 	 * Check that all plugin requirements are met
