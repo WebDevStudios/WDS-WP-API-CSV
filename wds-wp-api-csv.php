@@ -217,7 +217,7 @@ class WDS_WP_API_CSV {
 	public function requirements_not_met_notice() {
 		// Output our error
 		echo '<div id="message" class="error">';
-		echo '<p>' . sprintf( __( 'WDS WP-API CSV is missing requirements (the WP-API plugin) and has been <a href="%s">deactivated</a>. Please make sure all requirements are available.', 'wds-wp-api-csv' ), admin_url( 'plugins.php' ) ) . '</p>';
+		echo '<p>' . sprintf( __( 'WDS WP-API CSV is missing requirements (the WP REST API plugin) and has been <a href="%s">deactivated</a>. Please make sure all requirements are available.', 'wds-wp-api-csv' ), admin_url( 'plugins.php' ) ) . '</p>';
 		echo '</div>';
 	}
 
