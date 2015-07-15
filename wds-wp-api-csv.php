@@ -183,7 +183,7 @@ class WDS_WP_API_CSV {
 		$plugin_activated = in_array( $plugin, $plugins_activated );
 		$plugin_network_activated = array_key_exists( $plugin, $plugins_network_activated );
 
-		return ! $plugin_activated && ! $plugin_network_activated;
+		return $plugin_activated || $plugin_network_activated;
 	}
 
 	/**
