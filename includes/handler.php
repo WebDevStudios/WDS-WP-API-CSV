@@ -176,4 +176,5 @@ class WDS_WP_API_CSV_Handler {
 				throw new Exception( 'Invalid '. __CLASS__ .' property: ' . $field );
 		}
 	}
+
 }
