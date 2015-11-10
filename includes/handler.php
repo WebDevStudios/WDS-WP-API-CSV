@@ -132,8 +132,6 @@ class WDS_WP_API_CSV_Handler {
 			}
 		}
 
-		error_log( '$cols: '. print_r( $cols, true ) );
-
 		return $cols;
 	}
 
