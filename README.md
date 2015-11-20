@@ -10,7 +10,7 @@
 
 ## Description ##
 
-Output WP-API json data to CSV
+Output WP-API json data to CSV. Add the `_csv` query parameter to convert JSON query responses to a CSV download.
 
 ## Installation ##
 
